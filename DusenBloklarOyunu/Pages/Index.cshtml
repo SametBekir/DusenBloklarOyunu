@@ -1,0 +1,127 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Düşen Bloklar";
+}
+
+<div id="game-area">
+    <div id="player"></div>
+</div>
+
+<div id="game-controls">
+    <button id="start-button">Oyunu Başlat</button>
+</div>
+
+<div id="score-board">
+    <p>Puan: <span id="score">0</span></p>
+    <p>Seviye: <span id="level">1</span></p>
+</div>
+
+<div id="leaderboard-container">
+    <h3>Liderlik Tablosu</h3>
+    <ul id="leaderboard"></ul>
+</div>
+
+<!-- Yeni listbox ekleniyor -->
+<div id="player-scores">
+    <h3>Oyuncular ve Skorları</h3>
+    <select id="score-list" size="10" disabled></select> <!-- Listbox -->
+</div>
+
+<script src="site.js"></script>
+
+<style>
+    /* Basit oyun stili */
+    #game-area {
+        position: relative;
+        width: 500px;
+        height: 600px;
+        border: 2px solid black;
+        overflow: hidden;
+        background-color: #f0f0f0;
+    }
+
+    .dangerous-item {
+        background-color: black; /* Tehlikeli bloklar siyah renkte olacak */
+        border: 2px solid yellow; /* Tehlike belirtisi olarak sarı çerçeve */
+    }
+
+    #player {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        width: 50px;
+        height: 50px;
+        background-color: blue;
+        transform: translateX(-50%);
+    }
+
+    .falling-item {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-color: red;
+    }
+
+    #game-controls {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    #score-board {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    #leaderboard-container {
+        margin-top: 30px;
+        text-align: center;
+        float: right;
+        width: 200px;
+        padding: 10px;
+        border: 2px solid #ccc;
+        background-color: #f9f9f9;
+    }
+
+    #leaderboard {
+        list-style-type: none;
+        padding: 0;
+    }
+
+        #leaderboard li {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+    #player-scores {
+        margin-top: 30px;
+        text-align: center;
+        float: right;
+        width: 200px;
+        padding: 10px;
+        border: 2px solid #ccc;
+        background-color: #f9f9f9;
+    }
+
+    #score-list {
+        width: 100%;
+        height: 150px;
+        margin-top: 10px;
+        font-size: 14px;
+        background-color: #f0f0f0;
+    }
+</style>
