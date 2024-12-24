@@ -1,9 +1,22 @@
 ﻿@page
-@model IndexModel
+@model DusenBloklarOyunu.Pages.IndexModel
 @{
-    ViewData["Title"] = "Düşen Bloklar";
+    ViewData["Title"] = "Düşen Elmalar";
 }
 
+<h1>@ViewData["Title"]</h1>
+
+@if (TempData["Message"] != null)
+{
+        <p style="color: green;">@TempData["Message"]</p>
+}
+
+@if (TempData["Error"] != null)
+{
+        <p style="color: red;">@TempData["Error"]</p>
+}
+
+<!-- Oyun Alanı -->
 <div id="game-area">
     <div id="player"></div>
 </div>
@@ -17,111 +30,93 @@
     <p>Seviye: <span id="level">1</span></p>
 </div>
 
-<div id="leaderboard-container">
-    <h3>Liderlik Tablosu</h3>
-    <ul id="leaderboard"></ul>
-</div>
+<!-- Veri Kaydetme Formu -->
+<h3>Oyuncu Verisi Kaydet</h3>
+<form method="post" asp-page-handler="SaveData">
+    <input type="text" name="playerName" placeholder="Oyuncu Adı" required />
+    <input type="number" name="score" placeholder="Puan" required />
+    <input type="number" name="level" placeholder="Seviye" required />
+    <button type="submit">Veriyi Kaydet</button>
+</form>
 
-<!-- Yeni listbox ekleniyor -->
-<div id="player-scores">
-    <h3>Oyuncular ve Skorları</h3>
-    <select id="score-list" size="10" disabled></select> <!-- Listbox -->
-</div>
+<!-- Kaydedilen Verileri Göster -->
+<h3>Kaydedilen Veriler:</h3>
+@if (Model.GameData != null && Model.GameData.Length > 0)
+{
+        <ul>
+        @foreach (var line in Model.GameData)
+        {
+                    <li>@line</li>
+        }
+        </ul>
+}
+else
+{
+        <p>Henüz kaydedilmiş bir veri yok.</p>
+}
 
-<script src="site.js"></script>
+<script>
+    let playerName = "";
+    let score = 0;
+    let level = 1;
+    let gameInterval;
+    let isGameRunning = false;
+
+    function startGame() {
+        if (isGameRunning) return;
+
+        isGameRunning = true;
+        score = 0;
+        level = 1;
+        document.getElementById("start-button").style.display = "none";
+
+        // Oyun başlama işlemleri
+        gameInterval = setInterval(updateGame, 30);
+    }
+
+    function updateGame() {
+        if (!isGameRunning) return;
+
+        // Puan ve seviye güncelleme
+        if (score >= 50 * level) {
+            level++;
+        }
+        document.getElementById("score").innerText = score;
+        document.getElementById("level").innerText = level;
+    }
+
+    document.getElementById("start-button").addEventListener("click", startGame);
+</script>
 
 <style>
-    /* Basit oyun stili */
+    body {
+        background-image: url('/images/Adsız tasarım.png');
+        background-size: cover;
+        margin: 0;
+        height: 100vh;
+    }
+
     #game-area {
         position: relative;
         width: 500px;
         height: 600px;
         border: 2px solid black;
         overflow: hidden;
-        background-color: #f0f0f0;
-    }
-
-    .dangerous-item {
-        background-color: black; /* Tehlikeli bloklar siyah renkte olacak */
-        border: 2px solid yellow; /* Tehlike belirtisi olarak sarı çerçeve */
+        background-color: brown;
     }
 
     #player {
         position: absolute;
         bottom: 10px;
         left: 50%;
-        width: 50px;
-        height: 50px;
-        background-color: blue;
+        width: 90px;
+        height: 90px;
+        background-image: url('/images/projesepet.png');
+        background-size: cover;
         transform: translateX(-50%);
     }
 
-    .falling-item {
-        position: absolute;
-        width: 30px;
-        height: 30px;
-        background-color: red;
-    }
-
-    #game-controls {
+    #score-board, form {
         margin-top: 20px;
-        text-align: center;
-    }
-
-    #score-board {
-        margin-top: 20px;
-        text-align: center;
-    }
-
-    #leaderboard-container {
-        margin-top: 30px;
-        text-align: center;
-        float: right;
-        width: 200px;
-        padding: 10px;
-        border: 2px solid #ccc;
-        background-color: #f9f9f9;
-    }
-
-    #leaderboard {
-        list-style-type: none;
-        padding: 0;
-    }
-
-        #leaderboard li {
-            margin: 5px 0;
-            font-size: 16px;
-        }
-
-    button {
-        padding: 10px 20px;
-        font-size: 16px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-    #player-scores {
-        margin-top: 30px;
-        text-align: center;
-        float: right;
-        width: 200px;
-        padding: 10px;
-        border: 2px solid #ccc;
-        background-color: #f9f9f9;
-    }
-
-    #score-list {
-        width: 100%;
-        height: 150px;
-        margin-top: 10px;
-        font-size: 14px;
-        background-color: #f0f0f0;
     }
 </style>

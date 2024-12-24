@@ -7,7 +7,7 @@ let gameOver = false; // Oyun durumu
 let playerName = ""; // Oyuncu adı
 let topScores = []; // Liderlik tablosu
 
-// Oyun başlatma fonksiyonu
+// Oyunun başlatılacağı fonksiyon
 document.addEventListener('DOMContentLoaded', () => {
     player = document.getElementById('player');
     gameArea = document.getElementById('game-area');
@@ -49,57 +49,57 @@ function startGame() {
             clearInterval(gameInterval); // Oyun bittiğinde kutucuk oluşturmayı durdur
             return;
         }
-        spawnFallingItem();
-    }, 1000); // Her 1 saniyede bir yeni kutucuk oluştur
+        spawnFallingItem(); // Yeni bir düşen öğe oluştur
+    }, 1090); // Her 1 saniyede bir yeni kutucuk oluştur
 }
 
+// Düşen öğeyi oluştur
 function spawnFallingItem() {
-    const fallingItem = document.createElement('div');
+    let item = document.createElement('div');
+    item.classList.add('falling-item');
 
-    // %80 ihtimalle normal blok, %20 ihtimalle tehlikeli blok
-    const isDangerous = Math.random() < 0.2;
-    fallingItem.classList.add('falling-item');
+    // Tehlikeli blok olasılığını, level'a göre dinamik olarak hesapla
+    const dangerChance = 0.2 + (level - 1) * 0.10; // Başlangıçta %20, her level'de %10 artar
+    const isDangerous = Math.random() < dangerChance; // Tehlikeli blok olasılığı
+
     if (isDangerous) {
-        fallingItem.classList.add('dangerous-item'); // Tehlikeli blok stilini ekle
+        item.classList.add('dangerous-item'); // Eğer tehlikeli bloksa, sınıf ekle
+    } else {
+        item.classList.add('normal-item'); // Normal blok
     }
 
-    // Rastgele yatay pozisyon
-    fallingItem.style.left = `${Math.random() * (gameArea.offsetWidth - 30)}px`;
-    fallingItem.style.top = `0px`;
+    item.style.left = `${Math.random() * (gameArea.offsetWidth - 50)}px`; // Düşen öğeyi rastgele konumlandır
+    gameArea.appendChild(item);
 
-    gameArea.appendChild(fallingItem);
-
-    // Düşme animasyonu
-    const fallInterval = setInterval(() => {
+    // Öğeyi aşağıya doğru hareket ettir
+    let fallInterval = setInterval(() => {
         if (gameOver) {
             clearInterval(fallInterval);
             return;
         }
 
-        const fallingItemRect = fallingItem.getBoundingClientRect();
+        item.style.top = `${item.offsetTop + 5}px`; // 5px her adımda aşağıya kaydır
+
+        // Öğenin alt kısmı ekranın altına geldiğinde
+        if (item.offsetTop > gameArea.offsetHeight) {
+            clearInterval(fallInterval);
+            gameArea.removeChild(item);
+        }
+
+        // Çarpışma kontrolü
         const playerRect = player.getBoundingClientRect();
+        const itemRect = item.getBoundingClientRect();
 
-        // Kutucuk yere ulaştığında
-        if (fallingItemRect.top > gameArea.offsetHeight) {
-            clearInterval(fallInterval);
-            gameArea.removeChild(fallingItem);
-        }
-
-        // Kutucuk oyuncuya çarparsa
-        if (checkCollision(fallingItemRect, playerRect)) {
-            clearInterval(fallInterval);
-            gameArea.removeChild(fallingItem);
-
-            if (fallingItem.classList.contains('dangerous-item')) {
-                endGame(); // Tehlikeli kutucuksa oyunu bitir
+        if (checkCollision(playerRect, itemRect)) {
+            if (item.classList.contains('dangerous-item')) {
+                endGame(); // Tehlikeli bloğa çarptığında oyunu bitir
             } else {
-                updateScore(10); // Normal kutucuksa puan ekle
+                updateScore(10); // Normal bloğa çarptığında skoru artır
             }
+            clearInterval(fallInterval);
+            gameArea.removeChild(item);
         }
-
-        // Aşağıya doğru hareket ettir
-        fallingItem.style.top = `${fallingItem.offsetTop + 5}px`;
-    }, 30); // 30ms'de bir hareket
+    }, 20); // Her 20ms'de bir öğeyi düşür
 }
 
 // Çarpışma kontrolü
@@ -131,11 +131,33 @@ function endGame() {
     // Skoru liderlik tablosuna ekle
     addToLeaderboard(playerName, score);
 
+    // Veritabanına oyuncuyu kaydet
+    savePlayerToDatabase(playerName, score);
+
     // Liderlik tablosunu güncelle
     updateLeaderboardDisplay();
 
-    alert("Tehlikeli bir bloğa dokundunuz! Oyun bitti.");
-    location.reload(); // Sayfayı yenileyerek oyunu sıfırla
+    alert("Yeşil Elmaya dokundunuz! Oyun bitti.");
+    // Sayfayı yenilemeden oyunu sıfırla
+}
+
+// Veritabanına oyuncuyu kaydet
+function savePlayerToDatabase(name, score) {
+    fetch('/api/Players/SavePlayer', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ playerName: name, score: score })
+    })
+        .then(response => {
+            if (response.ok) {
+                console.log("Oyuncu başarıyla kaydedildi.");
+            } else {
+                console.error("Oyuncu kaydedilemedi.");
+            }
+        })
+        .catch(error => console.error("Hata: ", error));
 }
 
 // Liderlik tablosuna skor ekle
