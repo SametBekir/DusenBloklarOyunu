@@ -1,0 +1,15 @@
+﻿function savePlayerToDatabase(playerName, score) {
+    fetch('/Shared/SavePlayer?handler=userkayit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: playerName, userPuan: score })
+    })
+        .then(response => {
+            if (response.ok) {
+                console.log("Oyuncu başarıyla kaydedildi.");
+            } else {
+                console.error("Oyuncu kaydedilemedi.");
+            }
+        })
+        .catch(error => console.error("Hata: ", error));
+}

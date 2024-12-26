@@ -27,6 +27,50 @@ namespace DusenBloklarOyunu.Pages.Shared
             }
         }
 
+        // Kullanıcıyı veritabanına kaydetme fonksiyonu
+        public static void userkayit(string username, int userPuan)
+        {
+            try
+            {
+                // Bağlantı açılmadan önce bağlantının açık olup olmadığını kontrol et
+                CheckConnection();
+
+                // SQL Insert komutunu oluştur
+                string query = "INSERT INTO Users (Username, UserPuan) VALUES (@Username, @UserPuan)";
+
+                // SqlCommand nesnesi oluştur
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    // Parametreler ile SQL komutunu koru (SQL Injection'dan kaçınmak için)
+                    command.Parameters.AddWithValue("@Username", username);
+                    command.Parameters.AddWithValue("@UserPuan", userPuan);
+
+                    // Sorguyu çalıştır ve veriyi kaydet
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    // Başarıyla kaydedildiyse
+                    if (rowsAffected > 0)
+                    {
+                        Console.WriteLine("Oyuncu başarıyla kaydedildi.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Kullanıcı kaydedilemedi.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Hata mesajını konsola yazdır
+                Console.WriteLine("Kullanıcı kaydederken bir hata oluştu: " + ex.Message);
+            }
+            finally
+            {
+                // Bağlantıyı kapat
+                CloseConnection();
+            }
+        }
+
         // Bağlantıyı kapatmak için bir yöntem
         public static void CloseConnection()
         {

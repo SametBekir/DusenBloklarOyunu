@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Başlatma butonuna tıklama olayı
     startButton.addEventListener('click', () => {
-        startButton.style.display = 'none';
         askPlayerName();
         startGame();
         document.addEventListener('keydown', movePlayer);
@@ -51,6 +50,7 @@ function movePlayer(event) {
 // Düşen kutucukları oluştur ve düşür
 function startGame() {
     gameArea.style.backgroundColor = "transparent";
+    document.getElementById('start-button').style.display = 'none';
     gameInterval = setInterval(() => {
         if (gameOver) {
             clearInterval(gameInterval);
@@ -119,16 +119,18 @@ function endGame() {
         updateLeaderboardDisplay();
     });
     downloadGameData(playerName, score, level);
+    savePlayerToDatabase(playerName, score)
+    document.getElementById('start-button').style.visibility = 'visible';
 
     alert("Yeşil Elmaya dokundunuz! Oyun bitti.");
 }
-
-// Veritabanına oyuncuyu kaydet
-function savePlayerToDatabase(name, score) {
-    return fetch('/api/Players/SavePlayer', {
+function savePlayerToDatabase(playerName, score) {
+    fetch('/Shared/SavePlayer?handler=userkayit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerName: name, score: score })
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: playerName, userPuan: score })
     })
         .then(response => {
             if (response.ok) {
@@ -139,6 +141,8 @@ function savePlayerToDatabase(name, score) {
         })
         .catch(error => console.error("Hata: ", error));
 }
+
+
 
 // Not defterine oyun verilerini indirme
 function downloadGameData(playerName, score, level) {
